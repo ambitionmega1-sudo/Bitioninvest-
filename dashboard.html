@@ -41,12 +41,29 @@ color:#FFD700;
 }
 
 button{
-background:#ff4444;
-color:white;
 border:none;
-padding:10px 15px;
+padding:12px;
 border-radius:8px;
 cursor:pointer;
+font-weight:bold;
+}
+
+.logout{
+background:#ff4444;
+color:white;
+}
+
+.withdraw{
+background:#FFD700;
+color:black;
+width:100%;
+margin-top:15px;
+}
+
+.withdraw:disabled{
+background:#555;
+color:#aaa;
+cursor:not-allowed;
 }
 
 .card{
@@ -54,6 +71,13 @@ background:#161b22;
 padding:20px;
 border-radius:15px;
 margin-bottom:15px;
+}
+
+.profile{
+background:#161b22;
+padding:20px;
+border-radius:15px;
+margin-bottom:20px;
 }
 
 .title{
@@ -78,13 +102,6 @@ color:#FFD700;
 font-weight:bold;
 }
 
-.profile{
-background:#161b22;
-padding:20px;
-border-radius:15px;
-margin-bottom:20px;
-}
-
 </style>
 
 </head>
@@ -102,7 +119,7 @@ margin-bottom:20px;
 BitionInvest
 </div>
 
-<button id="logoutBtn">
+<button class="logout" id="logoutBtn">
 Logout
 </button>
 
@@ -136,6 +153,7 @@ $0.00
 
 
 
+
 <div class="card">
 
 <div class="title">
@@ -147,6 +165,7 @@ $0.00
 </div>
 
 </div>
+
 
 
 
@@ -164,6 +183,29 @@ No Active Plan
 
 
 
+
+<div class="card">
+
+<div class="title">
+Withdrawal
+</div>
+
+
+<div class="value" id="withdrawMessage">
+Checking balance...
+</div>
+
+
+<button class="withdraw" id="withdrawBtn" disabled>
+Request Withdrawal
+</button>
+
+
+</div>
+
+
+
+
 </div>
 
 
@@ -172,21 +214,24 @@ No Active Plan
 <script type="module">
 
 
-import { initializeApp } from "https://www.gstatic.com/firebasejs/12.16.0/firebase-app.js";
+import { initializeApp } 
+from "https://www.gstatic.com/firebasejs/12.16.0/firebase-app.js";
 
 
 import {
 getAuth,
 onAuthStateChanged,
 signOut
-} from "https://www.gstatic.com/firebasejs/12.16.0/firebase-auth.js";
+}
+from "https://www.gstatic.com/firebasejs/12.16.0/firebase-auth.js";
 
 
 import {
 getFirestore,
 doc,
 getDoc
-} from "https://www.gstatic.com/firebasejs/12.16.0/firebase-firestore.js";
+}
+from "https://www.gstatic.com/firebasejs/12.16.0/firebase-firestore.js";
 
 
 
@@ -218,7 +263,7 @@ const db=getFirestore(app);
 
 
 
-onAuthStateChanged(auth,async(user)=>{
+onAuthStateChanged(auth, async(user)=>{
 
 
 if(!user){
@@ -242,15 +287,20 @@ if(userSnap.exists()){
 
 const data=userSnap.data();
 
+const balance=Number(data.balance);
 
 
-document.getElementById("username").innerHTML=data.name;
 
-document.getElementById("email").innerHTML=data.email;
+document.getElementById("username").innerHTML=
+data.name;
+
+
+document.getElementById("email").innerHTML=
+data.email;
 
 
 document.getElementById("balance").innerHTML=
-"$"+Number(data.balance).toFixed(2);
+"$"+balance.toFixed(2);
 
 
 document.getElementById("profit").innerHTML=
@@ -261,7 +311,39 @@ document.getElementById("plan").innerHTML=
 data.plan;
 
 
+
+const withdrawBtn=document.getElementById("withdrawBtn");
+
+const withdrawMessage=document.getElementById("withdrawMessage");
+
+
+
+if(balance >= 500){
+
+
+withdrawMessage.innerHTML=
+"Withdrawal available";
+
+
+withdrawBtn.disabled=false;
+
+
+}else{
+
+
+withdrawMessage.innerHTML=
+"Minimum withdrawal balance is $500";
+
+
+withdrawBtn.disabled=true;
+
+
 }
+
+
+
+}
+
 
 
 });
