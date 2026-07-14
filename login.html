@@ -1,53 +1,61 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
+
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
 <title>BitionInvest Login</title>
 
 <style>
+
 body{
-    font-family:Arial,sans-serif;
-    background:#0d1117;
-    color:white;
-    height:100vh;
-    display:flex;
-    justify-content:center;
-    align-items:center;
-    margin:0;
+margin:0;
+height:100vh;
+display:flex;
+justify-content:center;
+align-items:center;
+background:#0d1117;
+color:white;
+font-family:Arial,sans-serif;
 }
 
 .box{
-    background:#161b22;
-    padding:30px;
-    border-radius:12px;
-    text-align:center;
-    width:300px;
+background:#161b22;
+padding:30px;
+border-radius:15px;
+text-align:center;
+width:320px;
 }
 
-h2{
-    color:#FFD700;
+h1{
+color:#FFD700;
 }
 
 button{
-    background:#FFD700;
-    color:black;
-    border:none;
-    padding:15px 25px;
-    border-radius:8px;
-    font-weight:bold;
-    cursor:pointer;
+background:#FFD700;
+color:black;
+border:none;
+padding:15px;
+width:100%;
+border-radius:10px;
+font-weight:bold;
+font-size:16px;
+cursor:pointer;
 }
+
 </style>
 
 </head>
 
+
 <body>
+
 
 <div class="box">
 
-<h2>BitionInvest</h2>
+<h1>BitionInvest</h1>
 
 <p>Login with Google</p>
 
@@ -58,67 +66,95 @@ Continue with Google
 </div>
 
 
+
+
 <script type="module">
 
-import { initializeApp } from "https://www.gstatic.com/firebasejs/12.16.0/firebase-app.js";
+
+import { initializeApp } 
+from "https://www.gstatic.com/firebasejs/12.16.0/firebase-app.js";
+
 
 import {
 getAuth,
 GoogleAuthProvider,
 signInWithPopup
-} from "https://www.gstatic.com/firebasejs/12.16.0/firebase-auth.js";
+}
+from "https://www.gstatic.com/firebasejs/12.16.0/firebase-auth.js";
+
 
 import {
 getFirestore,
 doc,
 getDoc,
 setDoc
-} from "https://www.gstatic.com/firebasejs/12.16.0/firebase-firestore.js";
+}
+from "https://www.gstatic.com/firebasejs/12.16.0/firebase-firestore.js";
 
 
-const firebaseConfig = {
 
-apiKey: "AIzaSyBaEYh2FGQY87kSM2kSsvRBiq-UCiSwOvE",
+const firebaseConfig={
 
-authDomain: "bitioninvest2.firebaseapp.com",
 
-projectId: "bitioninvest2",
+apiKey:"AIzaSyBaEYh2FGQY87kSM2kSsvRBiq-UCiSwOvE",
 
-storageBucket: "bitioninvest2.firebasestorage.app",
+authDomain:"bitioninvest2.firebaseapp.com",
 
-messagingSenderId: "871198239497",
+projectId:"bitioninvest2",
 
-appId: "1:871198239497:web:4b3378722c8b289d68c1d8",
+storageBucket:"bitioninvest2.firebasestorage.app",
 
-measurementId: "G-M3KFRL4FF0"
+messagingSenderId:"871198239497",
+
+appId:"1:871198239497:web:4b3378722c8b289d68c1d8",
+
+measurementId:"G-M3KFRL4FF0"
 
 };
 
 
-const app = initializeApp(firebaseConfig);
 
-const auth = getAuth(app);
+const app=initializeApp(firebaseConfig);
 
-const db = getFirestore(app);
+const auth=getAuth(app);
 
-const provider = new GoogleAuthProvider();
+const db=getFirestore(app);
+
+const provider=new GoogleAuthProvider();
 
 
-document.getElementById("loginBtn").onclick = async ()=>{
+
+
+
+document
+.getElementById("loginBtn")
+.onclick=async()=>{
+
 
 try{
 
-const result = await signInWithPopup(auth, provider);
 
-const user = result.user;
+const result=
+await signInWithPopup(auth,provider);
 
 
-const userRef = doc(db,"users",user.uid);
 
-const userSnap = await getDoc(userRef);
+const user=result.user;
+
+
+
+const userRef=
+doc(db,"users",user.uid);
+
+
+
+const userSnap=
+await getDoc(userRef);
+
 
 
 if(!userSnap.exists()){
+
 
 await setDoc(userRef,{
 
@@ -132,28 +168,39 @@ profit:0,
 
 plan:"No Active Plan",
 
-role:user.email === "andrewstephenson543@gmail.com" ? "admin" : "user"
+role:user.email==="andrewstephenson543@gmail.com"
+?"admin"
+:"user"
 
 });
 
+
 }
+
 
 
 window.location.href="dashboard.html";
 
 
-}catch(error){
 
-alert(error.message);
+}
+
+catch(error){
+
+alert("Login failed: "+error.message);
 
 console.log(error);
 
 }
 
+
 };
+
 
 
 </script>
 
+
 </body>
+
 </html>
