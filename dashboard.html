@@ -2,6 +2,7 @@
 <html lang="en">
 
 <head>
+
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
@@ -51,6 +52,18 @@ background:#ff4444;
 color:white;
 }
 
+.withdraw{
+background:#FFD700;
+color:black;
+width:100%;
+margin-top:15px;
+}
+
+.withdraw:disabled{
+background:#555;
+color:#aaa;
+}
+
 .card{
 background:#161b22;
 padding:20px;
@@ -64,9 +77,8 @@ color:#aaa;
 
 .balance{
 font-size:35px;
-color:#00ff88;
 font-weight:bold;
-margin-top:10px;
+color:#00ff88;
 }
 
 .value{
@@ -77,17 +89,6 @@ margin-top:10px;
 .plan{
 color:#FFD700;
 font-weight:bold;
-}
-
-.withdraw{
-background:#FFD700;
-width:100%;
-margin-top:15px;
-}
-
-.withdraw:disabled{
-background:#555;
-color:#aaa;
 }
 
 input{
@@ -177,6 +178,7 @@ No Active Plan
 
 
 
+
 <div class="card">
 
 <div class="title">
@@ -191,7 +193,7 @@ Checking balance...
 <input 
 id="withdrawAmount"
 type="number"
-placeholder="Enter amount to withdraw"
+placeholder="Enter withdrawal amount"
 >
 
 
@@ -205,6 +207,7 @@ Request Withdrawal
 
 
 </div>
+
 
 
 
@@ -226,13 +229,16 @@ from "https://www.gstatic.com/firebasejs/12.16.0/firebase-auth.js";
 import {
 getFirestore,
 doc,
-getDoc
+getDoc,
+collection,
+addDoc,
+serverTimestamp
 }
 from "https://www.gstatic.com/firebasejs/12.16.0/firebase-firestore.js";
 
 
 
-const firebaseConfig = {
+const firebaseConfig={
 
 apiKey:"AIzaSyBaEYh2FGQY87kSM2kSsvRBiq-UCiSwOvE",
 
@@ -258,7 +264,9 @@ const db=getFirestore(app);
 
 
 
-let userBalance=0;
+let currentUser=null;
+
+let currentBalance=0;
 
 
 
@@ -274,6 +282,9 @@ return;
 }
 
 
+currentUser=user;
+
+
 const snap=await getDoc(
 doc(db,"users",user.uid)
 );
@@ -286,7 +297,7 @@ if(snap.exists()){
 const data=snap.data();
 
 
-userBalance=Number(data.balance);
+currentBalance=Number(data.balance);
 
 
 
@@ -295,7 +306,7 @@ document.getElementById("username").innerHTML=data.name;
 document.getElementById("email").innerHTML=data.email;
 
 document.getElementById("balance").innerHTML=
-"$"+userBalance.toFixed(2);
+"$"+currentBalance.toFixed(2);
 
 document.getElementById("profit").innerHTML=
 "$"+Number(data.profit).toFixed(2);
@@ -305,12 +316,13 @@ data.plan;
 
 
 
-if(userBalance>=500){
+if(currentBalance>=500){
 
 document.getElementById("withdrawMessage").innerHTML=
 "Withdrawal available";
 
 document.getElementById("withdrawBtn").disabled=false;
+
 
 }else{
 
@@ -319,6 +331,7 @@ document.getElementById("withdrawMessage").innerHTML=
 
 }
 
+
 }
 
 
@@ -326,15 +339,28 @@ document.getElementById("withdrawMessage").innerHTML=
 
 
 
-document.getElementById("withdrawBtn").onclick=()=>{
 
 
-const amount=
-Number(document.getElementById("withdrawAmount").value);
+document.getElementById("withdrawBtn").onclick=async()=>{
+
+
+const amount=Number(
+document.getElementById("withdrawAmount").value
+);
 
 
 
-if(amount>userBalance){
+if(amount<=0){
+
+alert("Enter a valid amount");
+
+return;
+
+}
+
+
+
+if(amount>currentBalance){
 
 alert("Insufficient balance");
 
@@ -343,10 +369,31 @@ return;
 }
 
 
-alert("Withdrawal request feature will be connected next");
+
+await addDoc(collection(db,"withdrawals"),{
+
+userId:currentUser.uid,
+
+name:document.getElementById("username").innerHTML,
+
+email:document.getElementById("email").innerHTML,
+
+amount:amount,
+
+status:"Pending",
+
+createdAt:serverTimestamp()
+
+});
+
+
+
+alert("Withdrawal request submitted");
 
 
 };
+
+
 
 
 
