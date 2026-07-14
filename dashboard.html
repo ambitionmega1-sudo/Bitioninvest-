@@ -2,6 +2,7 @@
 <html lang="en">
 
 <head>
+
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
@@ -34,25 +35,18 @@ margin-bottom:20px;
 }
 
 .logo{
-font-size:25px;
+font-size:26px;
 font-weight:bold;
 color:#FFD700;
 }
 
-.logout{
+button{
 background:#ff4444;
 color:white;
 border:none;
 padding:10px 15px;
 border-radius:8px;
 cursor:pointer;
-}
-
-.profile{
-background:#161b22;
-padding:20px;
-border-radius:15px;
-margin-bottom:20px;
 }
 
 .card{
@@ -62,6 +56,11 @@ border-radius:15px;
 margin-bottom:15px;
 }
 
+.title{
+color:#aaa;
+font-size:14px;
+}
+
 .balance{
 font-size:35px;
 font-weight:bold;
@@ -69,14 +68,9 @@ color:#00ff88;
 margin-top:10px;
 }
 
-.title{
-color:#aaa;
-font-size:14px;
-}
-
 .value{
 font-size:22px;
-margin-top:8px;
+margin-top:10px;
 }
 
 .plan{
@@ -84,16 +78,11 @@ color:#FFD700;
 font-weight:bold;
 }
 
-.transaction{
-display:flex;
-justify-content:space-between;
-padding:12px 0;
-border-bottom:1px solid #333;
-}
-
-.loading{
-text-align:center;
-color:#aaa;
+.profile{
+background:#161b22;
+padding:20px;
+border-radius:15px;
+margin-bottom:20px;
 }
 
 </style>
@@ -102,6 +91,7 @@ color:#aaa;
 
 
 <body>
+
 
 <div class="container">
 
@@ -112,11 +102,12 @@ color:#aaa;
 BitionInvest
 </div>
 
-<button class="logout" id="logoutBtn">
+<button id="logoutBtn">
 Logout
 </button>
 
 </div>
+
 
 
 <div class="profile">
@@ -125,8 +116,7 @@ Logout
 Loading...
 </h3>
 
-<p id="email">
-</p>
+<p id="email"></p>
 
 </div>
 
@@ -174,24 +164,8 @@ No Active Plan
 
 
 
-<div class="card">
-
-<h3>
-Recent Transactions
-</h3>
-
-<div id="transactions">
-
-<p class="loading">
-No transactions yet
-</p>
-
 </div>
 
-</div>
-
-
-</div>
 
 
 
@@ -238,13 +212,13 @@ measurementId: "G-M3KFRL4FF0"
 
 const app = initializeApp(firebaseConfig);
 
-const auth = getAuth(app);
+const auth=getAuth(app);
 
-const db = getFirestore(app);
+const db=getFirestore(app);
 
 
 
-onAuthStateChanged(auth, async(user)=>{
+onAuthStateChanged(auth,async(user)=>{
 
 
 if(!user){
@@ -256,9 +230,10 @@ return;
 }
 
 
-const userRef = doc(db,"users",user.uid);
 
-const userSnap = await getDoc(userRef);
+const userRef=doc(db,"users",user.uid);
+
+const userSnap=await getDoc(userRef);
 
 
 
@@ -269,33 +244,29 @@ const data=userSnap.data();
 
 
 
-document.getElementById("username").innerHTML =
-data.name;
+document.getElementById("username").innerHTML=data.name;
+
+document.getElementById("email").innerHTML=data.email;
 
 
-document.getElementById("email").innerHTML =
-data.email;
+document.getElementById("balance").innerHTML=
+"$"+Number(data.balance).toFixed(2);
 
 
-document.getElementById("balance").innerHTML =
-"$" + data.balance.toFixed(2);
+document.getElementById("profit").innerHTML=
+"$"+Number(data.profit).toFixed(2);
 
 
-
-document.getElementById("profit").innerHTML =
-"$" + data.profit.toFixed(2);
-
-
-
-document.getElementById("plan").innerHTML =
+document.getElementById("plan").innerHTML=
 data.plan;
 
 
 }
 
 
-
 });
+
+
 
 
 
@@ -311,6 +282,7 @@ window.location="login.html";
 
 
 };
+
 
 
 </script>
