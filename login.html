@@ -1,79 +1,108 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
-
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
 <title>BitionInvest Login</title>
 
 <style>
-
-body{
+*{
 margin:0;
-height:100vh;
-display:flex;
-justify-content:center;
-align-items:center;
-background:#0d1117;
-color:white;
+padding:0;
+box-sizing:border-box;
 font-family:Arial,sans-serif;
 }
 
-.box{
-background:#161b22;
-padding:30px;
-border-radius:15px;
-text-align:center;
-width:320px;
+body{
+background:#0d1117;
+display:flex;
+justify-content:center;
+align-items:center;
+height:100vh;
+color:#fff;
 }
 
-h1{
+.container{
+width:100%;
+max-width:380px;
+padding:20px;
+}
+
+.card{
+background:#161b22;
+padding:35px;
+border-radius:15px;
+box-shadow:0 0 20px rgba(0,0,0,.4);
+text-align:center;
+}
+
+.logo{
+font-size:32px;
+font-weight:bold;
 color:#FFD700;
+margin-bottom:10px;
+}
+
+.subtitle{
+color:#ccc;
+margin-bottom:25px;
 }
 
 button{
-background:#FFD700;
-color:black;
-border:none;
-padding:15px;
 width:100%;
+padding:15px;
+border:none;
 border-radius:10px;
-font-weight:bold;
+background:#FFD700;
+color:#000;
 font-size:16px;
+font-weight:bold;
 cursor:pointer;
+transition:.3s;
 }
 
+button:hover{
+opacity:.9;
+}
+
+.footer{
+margin-top:20px;
+font-size:13px;
+color:#888;
+}
 </style>
-
 </head>
-
 
 <body>
 
+<div class="container">
 
-<div class="box">
+<div class="card">
 
-<h1>BitionInvest</h1>
+<div class="logo">
+BitionInvest
+</div>
 
-<p>Login with Google</p>
+<p class="subtitle">
+Secure Investment Platform
+</p>
 
 <button id="loginBtn">
 Continue with Google
 </button>
 
+<div class="footer">
+Protected by Firebase Authentication
 </div>
 
+</div>
 
-
+</div>
 
 <script type="module">
 
-
-import { initializeApp } 
+import { initializeApp }
 from "https://www.gstatic.com/firebasejs/12.16.0/firebase-app.js";
-
 
 import {
 getAuth,
@@ -82,19 +111,13 @@ signInWithPopup
 }
 from "https://www.gstatic.com/firebasejs/12.16.0/firebase-auth.js";
 
-
 import {
 getFirestore,
 doc,
 getDoc,
 setDoc
 }
-from "https://www.gstatic.com/firebasejs/12.16.0/firebase-firestore.js";
-
-
-
-const firebaseConfig={
-
+from "https://www.gstatic.com/firebasejs/12.16.0/firebase-firestore.js";const firebaseConfig = {
 
 apiKey:"AIzaSyBaEYh2FGQY87kSM2kSsvRBiq-UCiSwOvE",
 
@@ -112,95 +135,69 @@ measurementId:"G-M3KFRL4FF0"
 
 };
 
+const app = initializeApp(firebaseConfig);
 
+const auth = getAuth(app);
 
-const app=initializeApp(firebaseConfig);
+const db = getFirestore(app);
 
-const auth=getAuth(app);
+const provider = new GoogleAuthProvider();
 
-const db=getFirestore(app);
+const loginBtn = document.getElementById("loginBtn");loginBtn.onclick = async () => {
 
-const provider=new GoogleAuthProvider();
+try {
 
+const result = await signInWithPopup(auth, provider);
 
+const user = result.user;
 
+const userRef = doc(db, "users", user.uid);
 
+const userSnap = await getDoc(userRef);
 
-document
-.getElementById("loginBtn")
-.onclick=async()=>{
+if (!userSnap.exists()) {
 
+await setDoc(userRef, {
 
-try{
+name: user.displayName,
 
+email: user.email,
 
-const result=
-await signInWithPopup(auth,provider);
+balance: 0,
 
+profit: 0,
 
+plan: "No Active Plan",
 
-const user=result.user;
-
-
-
-const userRef=
-doc(db,"users",user.uid);
-
-
-
-const userSnap=
-await getDoc(userRef);
-
-
-
-if(!userSnap.exists()){
-
-
-await setDoc(userRef,{
-
-name:user.displayName,
-
-email:user.email,
-
-balance:0,
-
-profit:0,
-
-plan:"No Active Plan",
-
-role:user.email==="andrewstephenson543@gmail.com"
-?"admin"
-:"user"
+role: user.email === "andrewstephenson543@gmail.com"
+? "admin"
+: "user"
 
 });
 
+}
+
+const data = (await getDoc(userRef)).data();
+
+if (data.role === "admin") {
+
+window.location.href = "admin.html";
+
+} else {
+
+window.location.href = "dashboard.html";
 
 }
 
+} catch (error) {
 
+console.error(error);
 
-window.location.href="dashboard.html";
-
-
-
-}
-
-catch(error){
-
-alert("Login failed: "+error.message);
-
-console.log(error);
+alert("Login failed: " + error.message);
 
 }
 
-
-};
-
-
-
-</script>
-
+};</script>
 
 </body>
-
 </html>
