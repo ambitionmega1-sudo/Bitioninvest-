@@ -1,162 +1,321 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
 <title>BitionInvest Dashboard</title>
 
 <style>
+
 *{
-margin:0;
-padding:0;
 box-sizing:border-box;
 font-family:Arial,sans-serif;
 }
 
 body{
+margin:0;
 background:#0d1117;
 color:white;
 padding:20px;
+}
+
+.container{
+max-width:500px;
+margin:auto;
 }
 
 .header{
 display:flex;
 justify-content:space-between;
 align-items:center;
-margin-bottom:25px;
+margin-bottom:20px;
 }
 
 .logo{
-font-size:26px;
+font-size:25px;
 font-weight:bold;
 color:#FFD700;
+}
+
+.logout{
+background:#ff4444;
+color:white;
+border:none;
+padding:10px 15px;
+border-radius:8px;
+cursor:pointer;
+}
+
+.profile{
+background:#161b22;
+padding:20px;
+border-radius:15px;
+margin-bottom:20px;
 }
 
 .card{
 background:#161b22;
 padding:20px;
-border-radius:12px;
-margin-bottom:20px;
-box-shadow:0 0 10px rgba(0,0,0,.2);
+border-radius:15px;
+margin-bottom:15px;
 }
 
 .balance{
-font-size:34px;
+font-size:35px;
 font-weight:bold;
 color:#00ff88;
 margin-top:10px;
 }
 
-.profit{
-color:#FFD700;
-font-size:18px;
+.title{
+color:#aaa;
+font-size:14px;
+}
+
+.value{
+font-size:22px;
 margin-top:8px;
 }
 
-button{
-width:100%;
-padding:15px;
-border:none;
-border-radius:8px;
-font-size:16px;
+.plan{
+color:#FFD700;
 font-weight:bold;
-margin-top:15px;
-cursor:pointer;
 }
 
-.withdraw{
-background:#FFD700;
-color:black;
-}
-
-.history{
-margin-top:10px;
-}
-
-.item{
+.transaction{
 display:flex;
 justify-content:space-between;
 padding:12px 0;
 border-bottom:1px solid #333;
 }
 
-.status{
-color:#00ff88;
+.loading{
+text-align:center;
+color:#aaa;
 }
 
-.notice{
-margin-top:25px;
-font-size:14px;
-color:#aaa;
-text-align:center;
-}
 </style>
 
 </head>
 
+
 <body>
 
+<div class="container">
+
+
 <div class="header">
-<div class="logo">BitionInvest</div>
-<div>👤 User</div>
+
+<div class="logo">
+BitionInvest
 </div>
 
-<div class="card">
-
-<h3>Available Balance</h3>
-
-<div class="balance">$10,000.00</div>
-
-<div class="profit">
-Today's Profit: +$250.00
-</div>
-
-<button class="withdraw">
-Request Withdrawal
+<button class="logout" id="logoutBtn">
+Logout
 </button>
 
 </div>
 
-<div class="card">
 
-<h3>Active Plan</h3>
+<div class="profile">
 
-<p>Premium Plan</p>
+<h3 id="username">
+Loading...
+</h3>
 
-<p style="margin-top:10px;">
-Expected Return: 2% Daily
+<p id="email">
 </p>
 
 </div>
 
+
+
 <div class="card">
 
-<h3>Recent Transactions</h3>
-
-<div class="history">
-
-<div class="item">
-<span> Profit</span>
-<span class="status">+$250</span>
+<div class="title">
+Available Balance
 </div>
 
-<div class="item">
-<span>Withdrawal Request</span>
-<span>Pending</span>
-</div>
-
-<div class="item">
-<span>Welcome Bonus</span>
-<span class="status">+$100</span>
+<div class="balance" id="balance">
+$0.00
 </div>
 
 </div>
 
+
+
+<div class="card">
+
+<div class="title">
+Today's Profit
 </div>
 
-<p class="notice">
-This is an investment plartform to make earnings Daily
+<div class="value" id="profit">
+$0.00
+</div>
+
+</div>
+
+
+
+<div class="card">
+
+<div class="title">
+Active Plan
+</div>
+
+<div class="value plan" id="plan">
+No Active Plan
+</div>
+
+</div>
+
+
+
+<div class="card">
+
+<h3>
+Recent Transactions
+</h3>
+
+<div id="transactions">
+
+<p class="loading">
+No transactions yet
 </p>
+
+</div>
+
+</div>
+
+
+</div>
+
+
+
+<script type="module">
+
+
+import { initializeApp } from "https://www.gstatic.com/firebasejs/12.16.0/firebase-app.js";
+
+
+import {
+getAuth,
+onAuthStateChanged,
+signOut
+} from "https://www.gstatic.com/firebasejs/12.16.0/firebase-auth.js";
+
+
+import {
+getFirestore,
+doc,
+getDoc
+} from "https://www.gstatic.com/firebasejs/12.16.0/firebase-firestore.js";
+
+
+
+const firebaseConfig = {
+
+apiKey: "AIzaSyBaEYh2FGQY87kSM2kSsvRBiq-UCiSwOvE",
+
+authDomain: "bitioninvest2.firebaseapp.com",
+
+projectId: "bitioninvest2",
+
+storageBucket: "bitioninvest2.firebasestorage.app",
+
+messagingSenderId: "871198239497",
+
+appId: "1:871198239497:web:4b3378722c8b289d68c1d8",
+
+measurementId: "G-M3KFRL4FF0"
+
+};
+
+
+
+const app = initializeApp(firebaseConfig);
+
+const auth = getAuth(app);
+
+const db = getFirestore(app);
+
+
+
+onAuthStateChanged(auth, async(user)=>{
+
+
+if(!user){
+
+window.location="login.html";
+
+return;
+
+}
+
+
+const userRef = doc(db,"users",user.uid);
+
+const userSnap = await getDoc(userRef);
+
+
+
+if(userSnap.exists()){
+
+
+const data=userSnap.data();
+
+
+
+document.getElementById("username").innerHTML =
+data.name;
+
+
+document.getElementById("email").innerHTML =
+data.email;
+
+
+document.getElementById("balance").innerHTML =
+"$" + data.balance.toFixed(2);
+
+
+
+document.getElementById("profit").innerHTML =
+"$" + data.profit.toFixed(2);
+
+
+
+document.getElementById("plan").innerHTML =
+data.plan;
+
+
+}
+
+
+
+});
+
+
+
+document.getElementById("logoutBtn").onclick=()=>{
+
+
+signOut(auth)
+.then(()=>{
+
+window.location="login.html";
+
+});
+
+
+};
+
+
+</script>
+
 
 </body>
+
 </html>
