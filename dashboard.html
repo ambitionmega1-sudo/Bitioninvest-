@@ -2,7 +2,6 @@
 <html lang="en">
 
 <head>
-
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
@@ -16,10 +15,10 @@ font-family:Arial,sans-serif;
 }
 
 body{
-margin:0;
 background:#0d1117;
 color:white;
 padding:20px;
+margin:0;
 }
 
 .container{
@@ -31,21 +30,20 @@ margin:auto;
 display:flex;
 justify-content:space-between;
 align-items:center;
-margin-bottom:20px;
 }
 
 .logo{
+color:#FFD700;
 font-size:26px;
 font-weight:bold;
-color:#FFD700;
 }
 
 button{
-border:none;
 padding:12px;
+border:none;
 border-radius:8px;
-cursor:pointer;
 font-weight:bold;
+cursor:pointer;
 }
 
 .logout{
@@ -53,42 +51,21 @@ background:#ff4444;
 color:white;
 }
 
-.withdraw{
-background:#FFD700;
-color:black;
-width:100%;
-margin-top:15px;
-}
-
-.withdraw:disabled{
-background:#555;
-color:#aaa;
-cursor:not-allowed;
-}
-
 .card{
 background:#161b22;
 padding:20px;
 border-radius:15px;
-margin-bottom:15px;
-}
-
-.profile{
-background:#161b22;
-padding:20px;
-border-radius:15px;
-margin-bottom:20px;
+margin-top:15px;
 }
 
 .title{
 color:#aaa;
-font-size:14px;
 }
 
 .balance{
 font-size:35px;
-font-weight:bold;
 color:#00ff88;
+font-weight:bold;
 margin-top:10px;
 }
 
@@ -100,6 +77,25 @@ margin-top:10px;
 .plan{
 color:#FFD700;
 font-weight:bold;
+}
+
+.withdraw{
+background:#FFD700;
+width:100%;
+margin-top:15px;
+}
+
+.withdraw:disabled{
+background:#555;
+color:#aaa;
+}
+
+input{
+width:100%;
+padding:12px;
+margin-top:10px;
+border-radius:8px;
+border:none;
 }
 
 </style>
@@ -127,7 +123,7 @@ Logout
 
 
 
-<div class="profile">
+<div class="card">
 
 <h3 id="username">
 Loading...
@@ -153,7 +149,6 @@ $0.00
 
 
 
-
 <div class="card">
 
 <div class="title">
@@ -165,7 +160,6 @@ $0.00
 </div>
 
 </div>
-
 
 
 
@@ -183,17 +177,22 @@ No Active Plan
 
 
 
-
 <div class="card">
 
 <div class="title">
 Withdrawal
 </div>
 
-
 <div class="value" id="withdrawMessage">
 Checking balance...
 </div>
+
+
+<input 
+id="withdrawAmount"
+type="number"
+placeholder="Enter amount to withdraw"
+>
 
 
 <button class="withdraw" id="withdrawBtn" disabled>
@@ -205,9 +204,7 @@ Request Withdrawal
 
 
 
-
 </div>
-
 
 
 
@@ -237,25 +234,23 @@ from "https://www.gstatic.com/firebasejs/12.16.0/firebase-firestore.js";
 
 const firebaseConfig = {
 
-apiKey: "AIzaSyBaEYh2FGQY87kSM2kSsvRBiq-UCiSwOvE",
+apiKey:"AIzaSyBaEYh2FGQY87kSM2kSsvRBiq-UCiSwOvE",
 
-authDomain: "bitioninvest2.firebaseapp.com",
+authDomain:"bitioninvest2.firebaseapp.com",
 
-projectId: "bitioninvest2",
+projectId:"bitioninvest2",
 
-storageBucket: "bitioninvest2.firebasestorage.app",
+storageBucket:"bitioninvest2.firebasestorage.app",
 
-messagingSenderId: "871198239497",
+messagingSenderId:"871198239497",
 
-appId: "1:871198239497:web:4b3378722c8b289d68c1d8",
-
-measurementId: "G-M3KFRL4FF0"
+appId:"1:871198239497:web:4b3378722c8b289d68c1d8"
 
 };
 
 
 
-const app = initializeApp(firebaseConfig);
+const app=initializeApp(firebaseConfig);
 
 const auth=getAuth(app);
 
@@ -263,92 +258,95 @@ const db=getFirestore(app);
 
 
 
-onAuthStateChanged(auth, async(user)=>{
+let userBalance=0;
+
+
+
+onAuthStateChanged(auth,async(user)=>{
 
 
 if(!user){
 
-window.location="login.html";
+location="login.html";
 
 return;
 
 }
 
 
-
-const userRef=doc(db,"users",user.uid);
-
-const userSnap=await getDoc(userRef);
-
-
-
-if(userSnap.exists()){
-
-
-const data=userSnap.data();
-
-const balance=Number(data.balance);
+const snap=await getDoc(
+doc(db,"users",user.uid)
+);
 
 
 
-document.getElementById("username").innerHTML=
-data.name;
+if(snap.exists()){
 
 
-document.getElementById("email").innerHTML=
-data.email;
+const data=snap.data();
 
+
+userBalance=Number(data.balance);
+
+
+
+document.getElementById("username").innerHTML=data.name;
+
+document.getElementById("email").innerHTML=data.email;
 
 document.getElementById("balance").innerHTML=
-"$"+balance.toFixed(2);
-
+"$"+userBalance.toFixed(2);
 
 document.getElementById("profit").innerHTML=
 "$"+Number(data.profit).toFixed(2);
-
 
 document.getElementById("plan").innerHTML=
 data.plan;
 
 
 
-const withdrawBtn=document.getElementById("withdrawBtn");
+if(userBalance>=500){
 
-const withdrawMessage=document.getElementById("withdrawMessage");
-
-
-
-if(balance >= 500){
-
-
-withdrawMessage.innerHTML=
+document.getElementById("withdrawMessage").innerHTML=
 "Withdrawal available";
 
-
-withdrawBtn.disabled=false;
-
+document.getElementById("withdrawBtn").disabled=false;
 
 }else{
 
-
-withdrawMessage.innerHTML=
+document.getElementById("withdrawMessage").innerHTML=
 "Minimum withdrawal balance is $500";
 
-
-withdrawBtn.disabled=true;
-
-
 }
 
-
-
 }
-
 
 
 });
 
 
+
+document.getElementById("withdrawBtn").onclick=()=>{
+
+
+const amount=
+Number(document.getElementById("withdrawAmount").value);
+
+
+
+if(amount>userBalance){
+
+alert("Insufficient balance");
+
+return;
+
+}
+
+
+alert("Withdrawal request feature will be connected next");
+
+
+};
 
 
 
@@ -358,7 +356,7 @@ document.getElementById("logoutBtn").onclick=()=>{
 signOut(auth)
 .then(()=>{
 
-window.location="login.html";
+location="login.html";
 
 });
 
