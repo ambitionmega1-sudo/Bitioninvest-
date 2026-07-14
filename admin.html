@@ -2,7 +2,6 @@
 <html lang="en">
 
 <head>
-
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
@@ -10,12 +9,8 @@
 
 <style>
 
-*{
-box-sizing:border-box;
-font-family:Arial,sans-serif;
-}
-
 body{
+font-family:Arial,sans-serif;
 background:#0d1117;
 color:white;
 padding:20px;
@@ -26,47 +21,39 @@ max-width:600px;
 margin:auto;
 }
 
-.header{
-display:flex;
-justify-content:space-between;
-align-items:center;
-margin-bottom:20px;
-}
-
-.logo{
-font-size:25px;
-font-weight:bold;
+h1{
 color:#FFD700;
-}
-
-button{
-background:#FFD700;
-border:none;
-padding:10px 15px;
-border-radius:8px;
-font-weight:bold;
-cursor:pointer;
 }
 
 .card{
 background:#161b22;
 padding:20px;
 border-radius:15px;
-margin-bottom:15px;
+margin-bottom:20px;
 }
 
-.user{
-border-bottom:1px solid #333;
-padding:15px 0;
+input,select{
+width:100%;
+padding:10px;
+margin-top:8px;
+margin-bottom:10px;
+border-radius:8px;
+border:none;
+}
+
+button{
+background:#FFD700;
+color:black;
+border:none;
+padding:12px;
+border-radius:8px;
+font-weight:bold;
+cursor:pointer;
+width:100%;
 }
 
 .balance{
 color:#00ff88;
-font-weight:bold;
-}
-
-.admin{
-color:#FFD700;
 }
 
 </style>
@@ -80,50 +67,27 @@ color:#FFD700;
 <div class="container">
 
 
-<div class="header">
-
-<div class="logo">
-BitionInvest Admin
-</div>
+<h1>BitionInvest Admin</h1>
 
 <button id="logout">
 Logout
 </button>
 
+
+<div id="adminInfo" class="card">
+Checking admin...
 </div>
 
 
-
-<div class="card">
-
-<h3 id="adminName">
-Checking access...
-</h3>
-
-<p id="adminEmail"></p>
-
-</div>
-
-
-
-<div class="card">
-
-<h3>
-Users
-</h3>
-
+<h2>Users</h2>
 
 <div id="users">
-
 Loading users...
-
 </div>
 
 
 </div>
 
-
-</div>
 
 
 
@@ -145,7 +109,8 @@ getFirestore,
 collection,
 getDocs,
 doc,
-getDoc
+getDoc,
+updateDoc
 } from "https://www.gstatic.com/firebasejs/12.16.0/firebase-firestore.js";
 
 
@@ -172,36 +137,35 @@ measurementId: "G-M3KFRL4FF0"
 
 const app = initializeApp(firebaseConfig);
 
-const auth = getAuth(app);
+const auth=getAuth(app);
 
-const db = getFirestore(app);
+const db=getFirestore(app);
 
 
 
-onAuthStateChanged(auth, async(user)=>{
+onAuthStateChanged(auth,async(user)=>{
 
 
 if(!user){
 
-window.location="login.html";
+location="login.html";
 
 return;
 
 }
 
 
+const adminRef=doc(db,"users",user.uid);
 
-const userRef = doc(db,"users",user.uid);
-
-const userSnap = await getDoc(userRef);
-
+const adminSnap=await getDoc(adminRef);
 
 
-if(!userSnap.exists() || userSnap.data().role !== "admin"){
+
+if(!adminSnap.exists() || adminSnap.data().role!=="admin"){
 
 alert("Access denied");
 
-window.location="dashboard.html";
+location="dashboard.html";
 
 return;
 
@@ -209,12 +173,12 @@ return;
 
 
 
-document.getElementById("adminName").innerHTML =
-user.displayName;
+document.getElementById("adminInfo").innerHTML=
 
-
-document.getElementById("adminEmail").innerHTML =
-user.email;
+`
+<h3>${user.displayName}</h3>
+<p>${user.email}</p>
+`;
 
 
 
@@ -226,17 +190,16 @@ loadUsers();
 
 
 
+
 async function loadUsers(){
 
 
-const usersBox = document.getElementById("users");
+const box=document.getElementById("users");
+
+box.innerHTML="";
 
 
-const snapshot = await getDocs(collection(db,"users"));
-
-
-
-usersBox.innerHTML="";
+const snapshot=await getDocs(collection(db,"users"));
 
 
 
@@ -246,30 +209,66 @@ snapshot.forEach((item)=>{
 const user=item.data();
 
 
+box.innerHTML += `
 
-usersBox.innerHTML += `
+<div class="card">
 
-<div class="user">
 
-<p>
-<b>${user.name}</b>
-</p>
+<h3>${user.name}</h3>
 
-<p>
-${user.email}
-</p>
+<p>${user.email}</p>
+
 
 <p class="balance">
-Balance: $${user.balance}
+Current Balance: $${user.balance}
 </p>
 
-<p>
-Profit: $${user.profit}
-</p>
 
-<p>
-Plan: ${user.plan}
-</p>
+
+<label>
+New Balance
+</label>
+
+<input id="balance-${item.id}" 
+value="${user.balance}">
+
+
+
+<label>
+New Profit
+</label>
+
+<input id="profit-${item.id}" 
+value="${user.profit}">
+
+
+
+<label>
+Plan
+</label>
+
+
+<select id="plan-${item.id}">
+
+<option ${user.plan=="No Active Plan"?"selected":""}>
+No Active Plan
+</option>
+
+<option ${user.plan=="Basic Plan"?"selected":""}>
+Basic Plan
+</option>
+
+<option ${user.plan=="Premium Plan"?"selected":""}>
+Premium Plan
+</option>
+
+</select>
+
+
+
+<button onclick="saveUser('${item.id}')">
+Save Changes
+</button>
 
 
 </div>
@@ -284,16 +283,51 @@ Plan: ${user.plan}
 
 
 
-document.getElementById("logout").onclick=()=>{
+
+window.saveUser = async(id)=>{
 
 
-signOut(auth)
-.then(()=>{
+const balance=
+Number(document.getElementById("balance-"+id).value);
 
-window.location="login.html";
+
+const profit=
+Number(document.getElementById("profit-"+id).value);
+
+
+const plan=
+document.getElementById("plan-"+id).value;
+
+
+
+await updateDoc(doc(db,"users",id),{
+
+balance:balance,
+
+profit:profit,
+
+plan:plan
 
 });
 
+
+alert("User updated successfully");
+
+
+location.reload();
+
+
+}
+
+
+
+
+
+document.getElementById("logout").onclick=()=>{
+
+signOut(auth);
+
+location="login.html";
 
 };
 
