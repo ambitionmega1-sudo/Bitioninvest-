@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BitionInvest Login</title>
+
+<style>
+body{
+    font-family:Arial,sans-serif;
+    background:#f5f5f5;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    height:100vh;
+}
+
+.box{
+    background:white;
+    padding:30px;
+    border-radius:10px;
+    text-align:center;
+    box-shadow:0 0 10px rgba(0,0,0,.15);
+}
+
+button{
+    background:#0b57d0;
+    color:white;
+    border:none;
+    padding:15px 25px;
+    border-radius:8px;
+    font-size:16px;
+    cursor:pointer;
+}
+</style>
+
+</head>
+<body>
+
+<div class="box">
+<h2>BitionInvest</h2>
+
+<p>Login with Google</p>
+
+<button id="loginBtn">
+Continue with Google
+</button>
+
+</div>
+
+<script type="module">
+
+import { initializeApp } from "https://www.gstatic.com/firebasejs/11.9.1/firebase-app.js";
+
+import {
+getAuth,
+GoogleAuthProvider,
+signInWithRedirect,
+getRedirectResult
+
+} from "https://www.gstatic.com/firebasejs/11.9.1/firebase-auth.js";
+
+const firebaseConfig = {
+
+apiKey: "AIzaSyBHeTULEE4kMVVpaZZ08XXcvQliF5fB9zI",
+
+authDomain: "bitioninvest.firebaseapp.com",
+
+projectId: "bitioninvest",
+
+storageBucket: "bitioninvest.firebasestorage.app",
+
+messagingSenderId: "725695181082",
+
+appId: "1:725695181082:web:2a093c6aeaee939eb4fca3",
+
+measurementId: "G-XC1NEHB7GD"
+
+};
+
+const app = initializeApp(firebaseConfig);
+
+const auth = getAuth(app);
+
+const provider = new GoogleAuthProvider();
+
+document.getElementById("loginBtn").onclick = ()=>{
+
+signInWithRedirect(auth,provider);
+
+};
+
+getRedirectResult(auth)
+.then((result)=>{
+
+if(result){
+
+window.location="dashboard.html";
+
+}
+
+})
+.catch((error)=>{
+
+alert(error.message);
+
+});
+
+</script>
+
+</body>
+</html>
