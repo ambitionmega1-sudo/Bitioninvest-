@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>BitionInvest Admin</title>
+
+<style>
+
+*{
+box-sizing:border-box;
+font-family:Arial,sans-serif;
+}
+
+body{
+background:#0d1117;
+color:white;
+padding:20px;
+}
+
+.container{
+max-width:600px;
+margin:auto;
+}
+
+.header{
+display:flex;
+justify-content:space-between;
+align-items:center;
+margin-bottom:20px;
+}
+
+.logo{
+font-size:25px;
+font-weight:bold;
+color:#FFD700;
+}
+
+button{
+background:#FFD700;
+border:none;
+padding:10px 15px;
+border-radius:8px;
+font-weight:bold;
+cursor:pointer;
+}
+
+.card{
+background:#161b22;
+padding:20px;
+border-radius:15px;
+margin-bottom:15px;
+}
+
+.user{
+border-bottom:1px solid #333;
+padding:15px 0;
+}
+
+.balance{
+color:#00ff88;
+font-weight:bold;
+}
+
+.admin{
+color:#FFD700;
+}
+
+</style>
+
+</head>
+
+
+<body>
+
+
+<div class="container">
+
+
+<div class="header">
+
+<div class="logo">
+BitionInvest Admin
+</div>
+
+<button id="logout">
+Logout
+</button>
+
+</div>
+
+
+
+<div class="card">
+
+<h3 id="adminName">
+Checking access...
+</h3>
+
+<p id="adminEmail"></p>
+
+</div>
+
+
+
+<div class="card">
+
+<h3>
+Users
+</h3>
+
+
+<div id="users">
+
+Loading users...
+
+</div>
+
+
+</div>
+
+
+</div>
+
+
+
+<script type="module">
+
+
+import { initializeApp } from "https://www.gstatic.com/firebasejs/12.16.0/firebase-app.js";
+
+
+import {
+getAuth,
+onAuthStateChanged,
+signOut
+} from "https://www.gstatic.com/firebasejs/12.16.0/firebase-auth.js";
+
+
+import {
+getFirestore,
+collection,
+getDocs,
+doc,
+getDoc
+} from "https://www.gstatic.com/firebasejs/12.16.0/firebase-firestore.js";
+
+
+
+const firebaseConfig = {
+
+apiKey: "AIzaSyBaEYh2FGQY87kSM2kSsvRBiq-UCiSwOvE",
+
+authDomain: "bitioninvest2.firebaseapp.com",
+
+projectId: "bitioninvest2",
+
+storageBucket: "bitioninvest2.firebasestorage.app",
+
+messagingSenderId: "871198239497",
+
+appId: "1:871198239497:web:4b3378722c8b289d68c1d8",
+
+measurementId: "G-M3KFRL4FF0"
+
+};
+
+
+
+const app = initializeApp(firebaseConfig);
+
+const auth = getAuth(app);
+
+const db = getFirestore(app);
+
+
+
+onAuthStateChanged(auth, async(user)=>{
+
+
+if(!user){
+
+window.location="login.html";
+
+return;
+
+}
+
+
+
+const userRef = doc(db,"users",user.uid);
+
+const userSnap = await getDoc(userRef);
+
+
+
+if(!userSnap.exists() || userSnap.data().role !== "admin"){
+
+alert("Access denied");
+
+window.location="dashboard.html";
+
+return;
+
+}
+
+
+
+document.getElementById("adminName").innerHTML =
+user.displayName;
+
+
+document.getElementById("adminEmail").innerHTML =
+user.email;
+
+
+
+loadUsers();
+
+
+});
+
+
+
+
+async function loadUsers(){
+
+
+const usersBox = document.getElementById("users");
+
+
+const snapshot = await getDocs(collection(db,"users"));
+
+
+
+usersBox.innerHTML="";
+
+
+
+snapshot.forEach((item)=>{
+
+
+const user=item.data();
+
+
+
+usersBox.innerHTML += `
+
+<div class="user">
+
+<p>
+<b>${user.name}</b>
+</p>
+
+<p>
+${user.email}
+</p>
+
+<p class="balance">
+Balance: $${user.balance}
+</p>
+
+<p>
+Profit: $${user.profit}
+</p>
+
+<p>
+Plan: ${user.plan}
+</p>
+
+
+</div>
+
+`;
+
+});
+
+
+}
+
+
+
+
+document.getElementById("logout").onclick=()=>{
+
+
+signOut(auth)
+.then(()=>{
+
+window.location="login.html";
+
+});
+
+
+};
+
+
+
+</script>
+
+
+</body>
+
+</html>
